@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: h4fide/Verserator@v1.0
+      - uses: h4fide/Verserator@v1.0.1
         with:
           deta-access-token: ${{ secrets.DETA_TOKEN }}
           deta-name: 'Verserator'
