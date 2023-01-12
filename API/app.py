@@ -115,6 +115,3 @@ async def page_not_found(request, exc):
         content={"message": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."},
     )
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app)
