@@ -2,7 +2,7 @@ import json
 from random import randint
 
 
-def loadjson(artist, file):
+def loadjson(artist, file="data"):
     filename = f"data/{artist}/{file}.json"
     file = open(filename, encoding="utf8")
     data = json.load(file)
@@ -15,7 +15,7 @@ def number_of_songs(data):
     songs = len(keys)
     return songs
 
-def songs_names(artist, file):
+def songs_names(artist, file="data"):
     data = loadjson(artist, file)
     songs = number_of_songs(data)
     songs_names = []
@@ -24,18 +24,25 @@ def songs_names(artist, file):
         songs_names.append({f"{i+1}": f"{song}"})
     return songs_names
 
-def randomlyric(artist, file, songs_amnt: int = None, track_number: int = None):
+def randomlyric(artist, file="data", songs_amnt: int = None, track_number: int = None):
     try:
         data = loadjson(artist=artist, file=file)
         songs = number_of_songs(data)
         if songs_amnt != None and track_number == None:
             if songs_amnt > songs:
-                songs = 30
+                songs = int(songs)
             elif songs_amnt < 1:
                 songs = 1
             else:
                 songs = songs_amnt
-        if songs_amnt != None and track_number != None:
+        elif songs_amnt != None and track_number != None:
+            if track_number > songs:
+                track_number = int(songs)
+            song = data[track_number-1]['title']
+
+        elif songs_amnt == None and track_number != None:
+            if track_number > songs:
+                track_number = int(songs)
             song = data[track_number-1]['title']
         else:
             songs = songs

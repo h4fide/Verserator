@@ -38,26 +38,58 @@ async def root(request: Request):
 
 @app.get("/api/v1/lmorphine", tags=["L'morphine API"])
 async def get_random_quote(lyric: str = Query(None, regex="random"), popularity: int = Query(None, ge=1, le=30), songs: str = Query(None, regex="all|random"), track: int = Query(None, ge=1, le=30)):
-
+    artist = "lmorphine"
     try:
         if lyric == "random" and popularity == None and track == None:
-            return randomlyric(artist="lmorphine", file="TOP30")
+            return randomlyric(artist=artist)
 
         elif lyric == "random" and popularity != None:
             print(popularity)
-            return randomlyric(artist="lmorphine", file="TOP30", songs_amnt=popularity)
+            return randomlyric(artist=artist, songs_amnt=popularity)
 
         elif lyric == "random" and popularity == None and track != None:
-            return randomlyric(artist="lmorphine", file="TOP30", track_number=track)
+            return randomlyric(artist=artist, track_number=track)
 
         elif lyric == "random" and popularity != None and track != None:
-            return randomlyric(artist="lmorphine", file="TOP30", track_number=track)
+            return randomlyric(artist=artist, track_number=track)
 
         elif lyric == None and popularity == None and track == None:
             if songs == "all":
-                return songs_names(artist="lmorphine", file="TOP30")
+                return songs_names(artist=artist)
             elif songs == "random":
-                songsnames = songs_names(artist="lmorphine", file="TOP30")
+                songsnames = songs_names(artist=artist)
+                return songsnames[randint(0, len(songsnames)-1)]
+            else:
+                return {"message": "Please use the correct query parameters. See the documentation for more information."}
+
+        else:
+            return {"message": "Please use the correct query parameters. See the documentation for more information."}
+    except Exception as e:
+        print("Error occured in get_random_quote function", e)
+        return {"message": "Please use the correct query parameters. See the documentation for more information."}
+
+@app.get("/api/v1/dollypran", tags=["Dollypran API"])
+async def get_random_quote(lyric: str = Query(None, regex="random"), popularity: int = Query(None), songs: str = Query(None, regex="all|random"), track: int = Query(None) ):
+    artist = "dollypran"
+    try:
+        if lyric == "random" and popularity == None and track == None:
+            return randomlyric(artist=artist)
+
+        elif lyric == "random" and popularity != None:
+            print(popularity)
+            return randomlyric(artist=artist, songs_amnt=popularity)
+
+        elif lyric == "random" and popularity == None and track != None:
+            return randomlyric(artist=artist, track_number=track)
+
+        elif lyric == "random" and popularity != None and track != None:
+            return randomlyric(artist=artist, track_number=track)
+
+        elif lyric == None and popularity == None and track == None:
+            if songs == "all":
+                return songs_names(artist=artist)
+            elif songs == "random":
+                songsnames = songs_names(artist=artist)
                 return songsnames[randint(0, len(songsnames)-1)]
             else:
                 return {"message": "Please use the correct query parameters. See the documentation for more information."}
