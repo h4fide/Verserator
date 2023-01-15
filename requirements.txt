@@ -1,1 +1,2 @@
 fastapi
+jinja2

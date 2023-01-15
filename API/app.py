@@ -1,79 +1,42 @@
-import json
-from fastapi import FastAPI, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+from fastapi import FastAPI, Query, Response, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from random import randint
 
-app = FastAPI()
-    
+from API.qrandom import randomlyric, songs_names
 
-def loadjson(artist, file):
-    filename = f"data/{artist}/{file}.json"
-    file = open(filename, encoding="utf8")
-    data = json.load(file)
-    return data
+tags_metadata = [
+    {
+        "name": "Verserator",
+        "description": "Its Give You Random Quotes From Songs",
+    },
+    {
+        "name": "L'morphine API",
+        "description": "L'morphine API by Verserator",
+    },
+]
 
-def number_of_songs(data):
-    keys = []
-    for key, value in data:
-        keys.append(key)
-    songs = len(keys)
-    return songs
+app = FastAPI(
+    title="Verserator", 
+    description="Its Give You Random Quotes From Songs", 
+    version="1.0.1" ,
+    openapi_tags=tags_metadata)
 
-def songs_names(artist, file):
-    data = loadjson(artist, file)
-    songs = number_of_songs(data)
-    songs_names = []
-    for i in range(0, songs):
-        song = data[i]['title']
-        songs_names.append({f"{i+1}": f"{song}"})
-    return songs_names
+app.mount("/static", StaticFiles(directory="API/static"), name="static")
 
-def randomlyric(artist, file, songs_amnt: int = None, track_number: int = None):
-    try:
-        data = loadjson(artist=artist, file=file)
-        songs = number_of_songs(data)
-        if songs_amnt != None and track_number == None:
-            if songs_amnt > songs:
-                songs = 30
-            elif songs_amnt < 1:
-                songs = 1
-            else:
-                songs = songs_amnt
-        if songs_amnt != None and track_number != None:
-            song = data[track_number-1]['title']
-        else:
-            songs = songs
+templates = Jinja2Templates(directory="API/templates")
 
-        random_song = randint(0, songs-1)
-        if track_number == None:
-            random_song = random_song
-        elif track_number != None:
-            random_song = track_number - 1
-        elif track_number < 1:
-            random_song = 0
-        elif track_number > songs:
-            random_song = songs - 1
-        elif track_number == "random":
-            random_song = randint(0, songs-1)
-        else:
-            random_song = random_song
-
-        lyrics = data[random_song]['lyrics']
-        song = data[random_song]['title']
-        line = randint(0, int(len(lyrics))-1)
-        line = lyrics[line]
-        random_lyric = {"Quote": f"{line}", "Song": f"{song}", "By": f"{artist}"}
-    except Exception as e:
-        print("Error occured in random_lyric function", e)
-    return random_lyric
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("API/static/img/favicon.ico")
 
 
+@app.get("/", tags=["Verserator"], response_class=HTMLResponse)
+async def root(request: Request): 
+    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Lyrics API. Please see the documentation for the correct usage of this API."}
-
-@app.get("/api/v1/lmorphine")
+@app.get("/api/v1/lmorphine", tags=["L'morphine API"])
 async def get_random_quote(lyric: str = Query(None, regex="random"), popularity: int = Query(None, ge=1, le=30), songs: str = Query(None, regex="all|random"), track: int = Query(None, ge=1, le=30)):
 
     try:
@@ -114,3 +77,4 @@ async def page_not_found(request, exc):
         status_code=404,
         content={"message": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."},
     )
+
